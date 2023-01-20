@@ -3,7 +3,7 @@ const { expect } = require('chai');
 
 describe('[Challenge] Truster', function () {
     let deployer, player;
-    let token, pool;
+    let token, pool, attackTruster;
 
     const TOKENS_IN_POOL = 1000000n * 10n ** 18n;
 
@@ -23,6 +23,9 @@ describe('[Challenge] Truster', function () {
 
     it('Execution', async function () {
         /** CODE YOUR SOLUTION HERE */
+        attackTruster = await (await ethers.getContractFactory('AttackTruster', player))
+        .deploy(pool.address, token.address);
+        await attackTruster.connect(player).attack();
     });
 
     after(async function () {

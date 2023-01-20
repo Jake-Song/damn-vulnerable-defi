@@ -1,5 +1,6 @@
 const { ethers } = require('hardhat');
 const { expect } = require('chai');
+const { providers } = require('ethers');
 
 describe('[Challenge] Unstoppable', function () {
     let deployer, player, someUser;
@@ -45,6 +46,7 @@ describe('[Challenge] Unstoppable', function () {
 
     it('Execution', async function () {
         /** CODE YOUR SOLUTION HERE */
+        await token.connect(player).transfer(vault.address, INITIAL_PLAYER_TOKEN_BALANCE);
     });
 
     after(async function () {
