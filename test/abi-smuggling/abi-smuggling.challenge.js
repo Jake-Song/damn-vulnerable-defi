@@ -45,14 +45,17 @@ describe('[Challenge] ABI smuggling', function () {
 
     it('Execution', async function () {
         /** CODE YOUR SOLUTION HERE */
-        
-        let methodId = ethers.utils.id("sweepFunds(address,address)").slice(0, 10);
+        const deployerPermission = await vault.getActionId('0x85fb709d', deployer.address, vault.address);
+        const playerPermission = await vault.getActionId('0x85fb709d', player.address, vault.address);
+        console.log("deployerPermission: ", deployerPermission);
+        console.log("playerPermission: ", playerPermission);
+        // let methodId = ethers.utils.id("sweepFunds(address,address)").slice(0, 10);
                 
-        let calldata = ethers.utils.hexConcat([
-            methodId, 
-            ethers.utils.defaultAbiCoder.encode(["address", "address"], [recovery.address, token.address])
-        ]);
-        await vault.connect(player).execute(vault.address, calldata);
+        // let calldata = ethers.utils.hexConcat([
+        //     methodId, 
+        //     ethers.utils.defaultAbiCoder.encode(["address", "address"], [recovery.address, token.address])
+        // ]);
+        // await vault.connect(player).execute(vault.address, calldata);
     });
 
     after(async function () {
