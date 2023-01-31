@@ -103,13 +103,11 @@ describe('[Challenge] Puppet', function () {
             token.address, uniswapExchange.address, lendingPool.address,
             {value: 20n * 10n ** 18n}
         );
-        console.log(await token.balanceOf(taker.address) / 10 ** 18);
-      
-        // await uniswapExchange.tokenToEthSwapInput(PLAYER_INITIAL_TOKEN_BALANCE, 1, (await ethers.provider.getBlock('latest')).timestamp * 2);
         
-        // await lendingPool.connect(player).borrow(10n * 10n ** 18n, player.address, {value: 20n * 10n ** 18n});
-
+        console.log(await ethers.provider.getBalance(uniswapExchange.address));
+       
         
+       
     });
 
     after(async function () {
