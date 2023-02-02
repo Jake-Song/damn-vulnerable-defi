@@ -95,19 +95,13 @@ describe('[Challenge] Puppet', function () {
 
     it('Execution', async function () {
         /** CODE YOUR SOLUTION HERE */
-        // let price = calculateTokenToEthInputPrice(
-        //     10n * 10n ** 18n, UNISWAP_INITIAL_TOKEN_RESERVE, UNISWAP_INITIAL_ETH_RESERVE
-        // );
-        // console.log(ethers.utils.formatEther(price), "ether");
-        let taker = await (await ethers.getContractFactory('Taker', player)).deploy(
+        // not completed yet
+        await token.transfer(uniswapExchange.address, 100000n * 10n ** 18n);
+        await (await ethers.getContractFactory('Taker', player)).deploy(
             token.address, uniswapExchange.address, lendingPool.address,
-            {value: 20n * 10n ** 18n}
+            {value: 20n * 10n ** 18n, gasLimit: 1e6}
         );
         
-        console.log(await ethers.provider.getBalance(uniswapExchange.address));
-       
-        
-       
     });
 
     after(async function () {

