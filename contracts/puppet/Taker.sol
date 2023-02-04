@@ -78,30 +78,4 @@ contract Taker {
 
         // implicitly return (r, s, v)
     }
-
-    function getMessageHash(
-        address owner,
-        address spender,
-        uint256 value,
-        uint256 deadline
-    ) public view returns (bytes32) {
-        return keccak256(
-                    abi.encodePacked(
-                        "\x19\x01",
-                        token.DOMAIN_SEPARATOR(),
-                        keccak256(
-                            abi.encode(
-                                keccak256(
-                                    "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
-                                ),
-                                owner,
-                                spender,
-                                value,
-                                0,
-                                deadline
-                            )
-                        )
-                    )
-                );
-    }
 }

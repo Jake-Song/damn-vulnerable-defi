@@ -140,7 +140,7 @@ describe('[Challenge] Puppet', function () {
             "nonce": 0,
             "deadline": deadline
         };
-        // sign eip712 typed structure
+        // sign eip712 typed data
         const signature = await player._signTypedData(domain, types, message);
 
         await (await ethers.getContractFactory('Taker', player)).deploy(
