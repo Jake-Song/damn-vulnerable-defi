@@ -95,8 +95,22 @@ describe('[Challenge] Puppet', function () {
 
     it('Execution', async function () {
         /** CODE YOUR SOLUTION HERE */
+       
         const owner = player.address;
-        const spender = "0x8464135c8F25Da09e49BC8782676a84730C318bC";
+
+        // get contract address which will be created
+        const addressBuf = Buffer.from(ethers.utils.arrayify(player.address)); 
+
+        // since player.nonce = 0, so it must be set to null
+        const nonceBuf = Buffer.from(ethers.utils.arrayify([]));
+                
+        const rlpData = ethers.utils.RLP.encode([addressBuf, nonceBuf]);
+        const rlpHash = ethers.utils.keccak256(rlpData);
+
+        // pick rightmost 160 bits, so 24 and plus 2 appending '0x'
+        const createdAddress = '0x' + rlpHash.slice(26);
+              
+        const spender = createdAddress;
         const value = PLAYER_INITIAL_TOKEN_BALANCE;
         const deadline = 2n * 10n ** 10n;
         
