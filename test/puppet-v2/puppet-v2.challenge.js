@@ -5,9 +5,7 @@ const routerJson = require("@uniswap/v2-periphery/build/UniswapV2Router02.json")
 const { ethers } = require('hardhat');
 const { expect } = require('chai');
 const { setBalance } = require("@nomicfoundation/hardhat-network-helpers");
-function calculateTokenToEthInputPrice(tokensSold, tokensInReserve, etherInReserve) {
-    return (tokensSold * 997n * etherInReserve) / (tokensInReserve * 1000n + tokensSold * 997n);
-}
+
 describe('[Challenge] Puppet v2', function () {
     let deployer, player;
     let token, weth, uniswapFactory, uniswapRouter, uniswapExchange, lendingPool;
